@@ -388,48 +388,6 @@ ul {
   color: var(--muted);
 }
 
-/* 폴라로이드 카드 */
-.polaroid {
-  position: relative;
-  align-self: center;
-  width: 78%;
-  margin: 30px 0 26px;
-  padding: 12px 12px 14px;
-  background: #fff;
-  border-radius: 4px;
-  box-shadow: 0 8px 24px rgba(96, 71, 52, 0.12);
-  transform: rotate(-2.5deg);
-}
-
-.polaroid-color {
-  aspect-ratio: 1 / 0.85;
-  border-radius: 2px;
-  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
-}
-
-.polaroid-caption {
-  margin-top: 10px;
-  font-family: var(--font-script);
-  font-size: 18px;
-  white-space: nowrap;
-  text-align: center;
-  line-height: 1.1;
-}
-
-.tape {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  width: 90px;
-  height: 24px;
-  transform: translateX(-50%) rotate(3deg);
-  background: repeating-linear-gradient(
-    45deg,
-    rgba(240, 197, 212, 0.75) 0 6px,
-    rgba(248, 225, 230, 0.75) 6px 12px
-  );
-}
-
 /* 결과 블록 */
 .block {
   padding: 20px 4px 22px;
@@ -545,6 +503,42 @@ ul {
   align-items: center;
   gap: 6px;
   font-size: 13px;
+}
+
+/* 날씨 */
+.weather {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.weather-main {
+  flex: 1;
+}
+
+.weather-now {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.weather-now span {
+  font-family: var(--font-ko);
+  font-size: 15px;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.weather-sub,
+.weather-msg {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.weather-place {
+  align-self: flex-start;
+  font-size: 11px;
+  color: var(--muted);
 }
 
 /* 버튼 */

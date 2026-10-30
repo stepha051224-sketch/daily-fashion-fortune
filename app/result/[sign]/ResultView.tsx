@@ -5,7 +5,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getDailyFashion, type DailyFashion } from "@/lib/fortune";
-import { Bow, Heart, Sparkle, Star } from "../../Stickers";
+import { Heart, Sparkle, Star } from "../../Stickers";
+import WeatherBlock from "./WeatherBlock";
 
 const REVEAL_MS = 1000;
 
@@ -72,14 +73,6 @@ export default function ResultView({ signId }: { signId: string }) {
         </div>
       </header>
 
-      {/* 인물 사진 대신 오늘의 색을 담은 폴라로이드 */}
-      <figure className="polaroid">
-        <span className="tape" aria-hidden="true" />
-        <div className="polaroid-color" style={{ background: color.hex }} />
-        <figcaption className="polaroid-caption">a little style fortune for today</figcaption>
-        <Bow size={46} className="deco" style={{ right: -14, top: -18, transform: "rotate(18deg)" }} />
-      </figure>
-
       <section className="block">
         <p className="pill-label">Today&apos;s Color</p>
         <div className="color-row">
@@ -119,6 +112,8 @@ export default function ResultView({ signId }: { signId: string }) {
           ))}
         </ul>
       </section>
+
+      <WeatherBlock />
 
       <div className="actions">
         <a className="btn btn-secondary" href={searchUrl} target="_blank" rel="noopener noreferrer">
