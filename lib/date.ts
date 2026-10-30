@@ -8,10 +8,10 @@ export function toDateKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
-// 화면에 보여줄 날짜 (예: 2026년 10월 30일 금요일)
+// 화면에 보여줄 날짜 (예: 2026. 10. 30 (FRI))
 export function formatDate(date: Date): string {
-  const days = ["일", "월", "화", "수", "목", "금", "토"];
-  return `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일 ${days[date.getDay()]}요일`;
+  const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()} (${days[date.getDay()]})`;
 }
 
 // 한국 기준 계절: 봄 3~5월, 여름 6~8월, 가을 9~11월, 겨울 12~2월
