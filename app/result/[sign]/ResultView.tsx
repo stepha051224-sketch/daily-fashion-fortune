@@ -1,7 +1,7 @@
 "use client";
 
 // ② Reveal(약 1초) → ③ Result
-// 날짜는 사용자 기기 기준이라 브라우저에서 계산합니다.
+// 결과는 한국 시간 날짜 기준이며, 페이지를 열 때 브라우저에서 계산합니다.
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getDailyFashion, type DailyFashion } from "@/lib/fortune";
@@ -37,10 +37,10 @@ export default function ResultView({ signId }: { signId: string }) {
     );
   }
 
-  const { dateLabel, sign, color, item, howTo, pairColors } = result;
+  const { dateLabel, sign, color, item, howTo, pairColors, theme, story, basis } = result;
   const signEn = sign.id.charAt(0).toUpperCase() + sign.id.slice(1);
   const searchUrl =
-    "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(`${color.name} ${item.name} 코디`);
+    "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(`${color.name} ${item.name} ${theme.searchWord} 코디`);
 
   // ③ Result
   return (
@@ -73,6 +73,21 @@ export default function ResultView({ signId }: { signId: string }) {
         </div>
       </header>
 
+      {/* 오늘의 별자리 이야기: 추천 이유 */}
+      <section className="block story">
+        <p className="pill-label">Today&apos;s Story</p>
+        <div className="story-tags">
+          <span className="story-moon">
+            ☾ 오늘의 달 · {basis.moonSign.name}
+          </span>
+          <span className="story-theme">{theme.en}</span>
+        </div>
+        <p className="body-text">{story}</p>
+        <p className="note">
+          달의 위치는 한국 시간 정오 기준으로 계산했어요. 점성술의 상징을 패션으로 해석한 추천입니다.
+        </p>
+      </section>
+
       <section className="block">
         <p className="pill-label">Today&apos;s Color</p>
         <div className="color-row">
@@ -97,6 +112,7 @@ export default function ResultView({ signId }: { signId: string }) {
           </p>
         </div>
         <p className="body-text">{howTo[0]}</p>
+        <p className="body-text">{howTo[1]}</p>
         <p className="note">같은 색이 없다면 비슷한 톤의 아이템으로 대신해도 좋습니다.</p>
       </section>
 

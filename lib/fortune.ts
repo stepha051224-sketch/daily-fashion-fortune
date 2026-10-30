@@ -1,47 +1,194 @@
 // 오늘의 패션 운세 추천 로직
 //
 // 화면(UI)은 getDailyFashion() 하나만 사용합니다.
-// 나중에 실제 천체 데이터로 바꿀 때는 이 파일 안쪽만 고치면 됩니다.
+//
+// 추천 순서
+//  1. 오늘 날짜(한국 시간)와 별자리 확인
+//  2. 실제 달의 위치 계산 → 달이 머무는 별자리의 원소(불·흙·공기·물)
+//  3. 내 별자리 원소와 달의 원소의 관계 (같음 / 잘 어울림 / 다름)
+//  4. 별자리 성향 + 달의 흐름으로 오늘의 스타일 테마 결정
+//  5. 테마 안에서 컬러 → 그 컬러에 맞는 아이템 → 함께 쓰기 좋은 컬러
+//  6. 위에서 실제로 사용한 근거로 추천 이유 문장 생성
+//
+// 참고: 테마 후보와 비중은 별자리·달로 정해지고, 그 안에서 어떤 것을 고를지는
+// 날짜로 정해지는 규칙(같은 날짜 = 같은 결과)을 보조로 사용합니다.
+// 이 날짜 규칙은 점성술적 근거가 아니므로 추천 이유에는 쓰지 않습니다.
 
-import { COLORS, findColor, type Color } from "../data/colors";
+import { findColor, type Color } from "../data/colors";
 import { ITEMS, type Item } from "../data/items";
-import { findSign, type Sign } from "../data/signs";
-import { formatDate, getSeason, toDateKey } from "./date";
-import { pick } from "./seed";
+import { ELEMENT_NAMES, findSign, type Element, type Sign } from "../data/signs";
+import { MOON_MOODS, THEMES, type Theme, type ThemeId } from "../data/themes";
+import { dayNumber, formatDate, getSeason, kstNoon, previousKey, toKstDateKey, type DateKey } from "./date";
+import { josa } from "./korean";
+import { hashString } from "./seed";
+import { getMoonPosition } from "./sky";
+
+// 내 별자리 원소와 달의 원소의 관계
+// 점성술에서 불·공기, 흙·물은 서로 잘 어울리는 원소로 봅니다.
+export type Relation = "same" | "harmony" | "contrast";
+// 테마가 어디에서 왔는지: 별자리와 달 모두 / 별자리 성향 / 달의 흐름
+export type ThemeSource = "both" | "sign" | "moon";
 
 export type DailyFashion = {
+  dateKey: DateKey;
   dateLabel: string; // 화면용 날짜
   sign: Sign;
+  theme: Theme;
   color: Color;
   item: Item;
   howTo: string[]; // 활용 방법 문장들
   pairColors: Color[]; // 함께 쓰기 좋은 색
+  story: string; // 오늘의 별자리 이야기 (추천 이유)
+  // 추천에 실제로 사용한 근거
+  basis: {
+    moonSign: Sign; // 오늘(한국 시간 정오) 달이 머무는 별자리
+    moonLongitude: number;
+    moonElement: Element;
+    relation: Relation;
+    themeSource: ThemeSource;
+    trait: string; // 이유 문장에 쓴 별자리 상징
+  };
 };
 
-export function getDailyFashion(signId: string, date: Date): DailyFashion | null {
+function getRelation(a: Element, b: Element): Relation {
+  if (a === b) return "same";
+  const pair = [a, b].sort().join("-");
+  return pair === "air-fire" || pair === "earth-water" ? "harmony" : "contrast";
+}
+
+// 테마별 비중을 정해 날짜 규칙으로 하나를 고릅니다.
+function chooseTheme(sign: Sign, moonElement: Element, relation: Relation, key: DateKey) {
+  const moonThemes = MOON_MOODS[moonElement].themes;
+  const weights = new Map<ThemeId, number>();
+
+  // 별자리 성향 테마: 기본 성향일수록 비중이 큼 (4, 3, 2)
+  sign.styles.forEach((s, i) => {
+    let w = 4 - i;
+    if (relation !== "contrast") w += 1; // 달과 기운이 맞는 날은 본래 성향이 더 잘 살아남
+    if (moonThemes.includes(s.theme)) w += 2; // 달의 흐름과도 겹치는 테마
+    weights.set(s.theme, w);
+  });
+  // 달의 흐름 테마 중 별자리 성향에 없는 것: 기운이 다른 날일수록 비중이 큼
+  for (const t of moonThemes) {
+    if (!weights.has(t)) weights.set(t, relation === "contrast" ? 2 : 1);
+  }
+
+  const entries = [...weights.entries()];
+  const total = entries.reduce((sum, [, w]) => sum + w, 0);
+  let roll = hashString(`${key}|${sign.id}|theme`) % total;
+  let themeId = entries[0][0];
+  for (const [id, w] of entries) {
+    if (roll < w) {
+      themeId = id;
+      break;
+    }
+    roll -= w;
+  }
+
+  const fromSign = sign.styles.find((s) => s.theme === themeId);
+  const fromMoon = moonThemes.includes(themeId);
+  const themeSource: ThemeSource = fromSign && fromMoon ? "both" : fromSign ? "sign" : "moon";
+  const trait = (fromSign ?? sign.styles[0]).trait;
+  return { theme: THEMES[themeId], themeSource, trait };
+}
+
+// 목록을 날짜에 따라 하루에 한 칸씩 돌려 고릅니다.
+// (같은 테마가 이어지는 날에도 어제와 다른 것이 나오도록)
+function rotate<T extends { id: string }>(list: T[], salt: string, key: DateKey, avoidId?: string): T {
+  const start = hashString(salt) % list.length;
+  let index = (start + dayNumber(key)) % list.length;
+  if (list.length > 1 && list[index].id === avoidId) index = (index + 1) % list.length;
+  return list[index];
+}
+
+type Core = Omit<DailyFashion, "dateLabel" | "howTo" | "pairColors" | "story">;
+
+// depth: 어제 결과와 겹치지 않게 확인하는 깊이
+function computeCore(sign: Sign, key: DateKey, depth: number): Core {
+  // 2. 실제 달의 위치 (한국 시간 정오 기준)
+  const moon = getMoonPosition(kstNoon(key));
+  const moonElement = moon.sign.element;
+  // 3. 관계
+  const relation = getRelation(sign.element, moonElement);
+  // 4. 테마
+  const { theme, themeSource, trait } = chooseTheme(sign, moonElement, relation, key);
+
+  const yesterday = depth > 0 ? computeCore(sign, previousKey(key), depth - 1) : null;
+
+  // 5-1. 컬러: 테마에 어울리는 색 중에서
+  const themeColors = theme.colors.map((id) => findColor(id)).filter((c): c is Color => !!c);
+  const color = rotate(themeColors, `${sign.id}|${theme.id}|color`, key, yesterday?.color.id);
+
+  // 5-2. 아이템: 테마 + 계절 + 컬러에 맞는 것 중에서
+  const season = getSeason(key);
+  const fits = (item: Item) => item.seasons.includes(season) && (color.neutral || !item.neutralOnly);
+  let items = theme.items.map((id) => ITEMS.find((i) => i.id === id)).filter((i): i is Item => !!i && fits(i));
+  if (items.length === 0) items = ITEMS.filter(fits); // 혹시 없으면 계절에 맞는 전체 아이템
+  const item = rotate(items, `${sign.id}|${theme.id}|item`, key, yesterday?.item.id);
+
+  return {
+    dateKey: key,
+    sign,
+    theme,
+    color,
+    item,
+    basis: { moonSign: moon.sign, moonLongitude: moon.longitude, moonElement, relation, themeSource, trait },
+  };
+}
+
+// 6. 추천 이유 — 위에서 실제로 쓴 근거만 사용합니다.
+function buildStory(core: Core): string {
+  const { sign, theme, color, item, basis, dateKey } = core;
+  const moonEl = ELEMENT_NAMES[basis.moonElement];
+  const signEl = ELEMENT_NAMES[sign.element];
+  const mood = MOON_MOODS[basis.moonElement].mood;
+  const variant = hashString(`${dateKey}|${sign.id}|story`) % 2;
+
+  // ① 실제 천체 위치 (사실)
+  const sky =
+    variant === 0
+      ? `오늘 달은 ${moonEl}의 별자리인 ${basis.moonSign.name}에 머물고 있어요.`
+      : `오늘 달이 ${moonEl}의 별자리, ${basis.moonSign.name}에 들어와 있어요.`;
+
+  // ② 점성술적 해석 → 오늘의 테마
+  let reading: string;
+  if (basis.themeSource === "both") {
+    reading = `이 흐름의 ${josa.이(mood)} ${sign.name}의 ${josa.과(basis.trait)} 맞닿아, 오늘은 ${theme.ko} 스타일을 골랐어요.`;
+  } else if (basis.themeSource === "moon") {
+    reading = `평소 ${sign.name}의 ${basis.trait}에서 한 걸음 옮겨, 달이 주는 ${josa.을(mood)} 담은 ${theme.ko} 스타일을 제안해요.`;
+  } else if (basis.relation === "same") {
+    reading = `${josa.과(sign.name)} 같은 ${moonEl}의 기운이라, ${josa.을(basis.trait)} 그대로 살린 ${theme.ko} 스타일로 정했어요.`;
+  } else if (basis.relation === "harmony") {
+    reading = `${moonEl}의 기운은 ${signEl}의 별자리인 ${josa.과(sign.name)} 잘 어울려서, ${josa.을(basis.trait)} 살린 ${theme.ko} 스타일로 정했어요.`;
+  } else {
+    reading = `${josa.과(sign.name)}는 다른 기운이 흐르는 날이라, ${josa.을(basis.trait)} 중심에 두고 ${theme.ko} 스타일로 균형을 잡았어요.`;
+  }
+
+  // ③ 컬러·아이템 연결 (테마와 색의 분위기 표현이 같으면 한 번만 씁니다)
+  const colorWords = color.mood === theme.feel ? color.name : `${color.mood} ${color.name}`;
+  const outfit =
+    variant === 0
+      ? `그래서 ${colorWords} ${josa.으로(item.name)} ${theme.feel} 분위기를 만들어보세요.`
+      : `${theme.feel} 분위기에 맞춰 ${colorWords} ${josa.을(item.name)} 골라보세요.`;
+
+  return `${sky} ${reading} ${outfit}`;
+}
+
+export function getDailyFashionForKey(signId: string, key: DateKey): DailyFashion | null {
   const sign = findSign(signId);
   if (!sign) return null;
+  // 최근 8일을 거슬러 확인해 어제와 같은 컬러가 나오지 않게 합니다.
+  // (1년치 검증에서 전날과 같은 컬러 0회, 계산 시간 약 0.3ms)
+  const core = computeCore(sign, key, 8);
+  const { color, item, theme } = core;
 
-  // 예: "2026-10-30|aries"
-  const seed = `${toDateKey(date)}|${sign.id}`;
+  const howTo = [item.howTo.replace("{color}", color.name), theme.tip];
+  const pairColors = color.pairs.map((id) => findColor(id)).filter((c): c is Color => !!c);
 
-  // 1. 오늘의 색
-  const color = pick(COLORS, `${seed}|color`);
+  return { ...core, dateLabel: formatDate(key), howTo, pairColors, story: buildStory(core) };
+}
 
-  // 2. 오늘의 아이템: 계절에 맞고, 색과도 어울리는 것 중에서 고릅니다.
-  const season = getSeason(date);
-  const items = ITEMS.filter(
-    (item) => item.seasons.includes(season) && (color.neutral || !item.neutralOnly),
-  );
-  const item = pick(items, `${seed}|item`);
-
-  // 3. 활용 방법
-  const howTo = [item.howTo.replace("{color}", color.name), color.tip];
-
-  // 4. 함께 쓰기 좋은 색
-  const pairColors = color.pairs
-    .map((id) => findColor(id))
-    .filter((c): c is Color => c !== undefined);
-
-  return { dateLabel: formatDate(date), sign, color, item, howTo, pairColors };
+// 화면에서 사용: 지금 시각을 한국 날짜로 바꿔 추천을 만듭니다.
+export function getDailyFashion(signId: string, now: Date): DailyFashion | null {
+  return getDailyFashionForKey(signId, toKstDateKey(now));
 }

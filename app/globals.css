@@ -505,6 +505,27 @@ ul {
   font-size: 13px;
 }
 
+/* 오늘의 별자리 이야기 */
+.story-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-bottom: 10px;
+}
+
+.story-moon {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.story-theme {
+  font-family: var(--font-en);
+  font-style: italic;
+  font-size: 14px;
+  color: var(--pink-deep);
+}
+
 /* 날씨 */
 .weather {
   display: flex;
