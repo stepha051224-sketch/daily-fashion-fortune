@@ -29,6 +29,7 @@ body {
   color-scheme: light;
   font-family: var(--font-ko);
   line-height: 1.6;
+  letter-spacing: -0.02em; /* 자간: 숫자를 더 작게(-0.03em 등) 하면 더 좁아집니다 */
   word-break: keep-all;
   -webkit-font-smoothing: antialiased;
 }
