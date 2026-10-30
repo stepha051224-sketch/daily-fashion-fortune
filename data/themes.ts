@@ -14,6 +14,7 @@ export type Theme = {
   ko: string; // 추천 이유 문장용 한글 이름
   feel: string; // 이 테마의 분위기 (문장용)
   tip: string; // 스타일링 팁
+  closings: string[]; // 추천 이유의 마지막 문장 (날짜에 따라 번갈아 사용)
   searchWord: string; // 코디 검색어에 붙는 단어
   colors: string[]; // 이 테마에 어울리는 색 id
   items: string[]; // 이 테마에 어울리는 아이템 id
@@ -23,6 +24,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   active: {
     id: "active", en: "Active Casual", ko: "액티브 캐주얼", feel: "가볍고 활기찬",
     tip: "움직이기 편한 핏을 기본으로 하고, 색은 한 곳에 또렷하게 두세요.",
+    closings: ["가볍게 움직이기 좋은 캐주얼 룩으로 하루를 시작해 보세요.", "편안한 차림에 산뜻함을 더해 보세요."],
     searchWord: "캐주얼",
     colors: ["navy", "white", "skyblue", "mustard", "khaki", "gray"],
     items: ["tshirt", "sweatshirt", "cap", "sneakers", "shorts", "jacket", "socks", "padding"],
@@ -30,6 +32,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   bold: {
     id: "bold", en: "Bold Point", ko: "볼드 포인트", feel: "또렷하고 당당한",
     tip: "포인트는 한 곳에만 두고 나머지는 덜어내면 더 세련돼 보여요.",
+    closings: ["오늘은 이 한 가지에 자연스럽게 시선이 모이게 입어보세요.", "또렷한 포인트 하나로 자신 있는 룩을 완성해 보세요."],
     searchWord: "포인트",
     colors: ["burgundy", "mustard", "terracotta", "black", "forest"],
     items: ["socks", "bag", "cap", "scarf", "muffler", "hairacc", "knit", "shirt"],
@@ -37,6 +40,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   soft: {
     id: "soft", en: "Soft Natural", ko: "소프트 내추럴", feel: "편안하고 자연스러운",
     tip: "여유 있는 핏과 부드러운 소재로 힘을 빼고 입어보세요.",
+    closings: ["편안한 룩으로 여유 있는 하루를 보내보세요.", "자연스러운 톤끼리 맞춰 편안하게 입어보세요."],
     searchWord: "내추럴",
     colors: ["ivory", "beige", "camel", "khaki", "brown", "mint"],
     items: ["knit", "cardigan", "shirt", "slacks", "scarf", "muffler", "coat", "bag"],
@@ -44,6 +48,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   romantic: {
     id: "romantic", en: "Romantic Soft", ko: "로맨틱 소프트", feel: "부드럽고 사랑스러운",
     tip: "부드러운 소재나 곡선이 있는 아이템을 하나 곁들여보세요.",
+    closings: ["은은한 컬러를 중심으로 부드러운 룩을 완성해 보세요.", "가볍고 부드러운 분위기로 하루를 시작해 보세요."],
     searchWord: "로맨틱",
     colors: ["pink", "lavender", "ivory", "skyblue", "white", "mint"],
     items: ["cardigan", "knit", "skirt", "scarf", "hairacc", "shirt", "muffler", "bag"],
@@ -51,6 +56,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   classic: {
     id: "classic", en: "Classic Neat", ko: "클래식", feel: "단정하고 믿음직한",
     tip: "직선적인 실루엣과 기본색을 중심으로 깔끔하게 맞춰보세요.",
+    closings: ["단정한 룩으로 차분하게 하루를 시작해 보세요.", "깔끔하게 정돈된 인상을 완성해 보세요."],
     searchWord: "클래식",
     colors: ["navy", "charcoal", "white", "black", "camel", "gray", "beige"],
     items: ["shirt", "slacks", "jacket", "coat", "knit", "skirt", "bag"],
@@ -58,6 +64,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   layered: {
     id: "layered", en: "Layered Mix", ko: "레이어드 믹스", feel: "가볍고 다채로운",
     tip: "얇은 옷을 겹쳐 입어 색이 살짝씩 보이게 해보세요.",
+    closings: ["여러 겹의 가벼운 조합으로 다채로운 룩을 만들어보세요.", "답답하지 않게, 가볍게 겹쳐 입는 걸 추천해요."],
     searchWord: "레이어드",
     colors: ["gray", "khaki", "skyblue", "mustard", "white", "navy", "lavender"],
     items: ["shirt", "cardigan", "tshirt", "sweatshirt", "jacket", "socks", "scarf"],
@@ -65,6 +72,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   deep: {
     id: "deep", en: "Deep Mood", ko: "딥 무드", feel: "깊고 차분한",
     tip: "어두운 톤을 바탕으로 질감이 있는 소재를 더해보세요.",
+    closings: ["톤을 낮춰 맞추면 분위기 있는 룩이 완성돼요.", "차분한 깊이가 느껴지는 룩을 완성해 보세요."],
     searchWord: "무드",
     colors: ["burgundy", "charcoal", "black", "forest", "navy", "brown"],
     items: ["knit", "coat", "jacket", "slacks", "muffler", "bag", "shirt"],
@@ -72,6 +80,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   dreamy: {
     id: "dreamy", en: "Dreamy Flow", ko: "드리미", feel: "은은하고 몽환적인",
     tip: "옅은 색끼리 이어지게 맞추고, 흐르는 듯한 실루엣을 골라보세요.",
+    closings: ["은은한 컬러를 중심으로 편안한 룩을 완성해 보세요.", "가벼운 색감으로 부드러운 분위기를 만들어보세요."],
     searchWord: "파스텔",
     colors: ["lavender", "skyblue", "mint", "pink", "white", "gray"],
     items: ["cardigan", "skirt", "shirt", "scarf", "hairacc", "knit", "tshirt"],
@@ -79,6 +88,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   chic: {
     id: "chic", en: "Balanced Chic", ko: "밸런스 시크", feel: "균형 잡히고 세련된",
     tip: "상의와 하의의 색과 핏의 무게를 비슷하게 맞춰보세요.",
+    closings: ["군더더기 없이 정돈된 룩을 완성해 보세요.", "깔끔하고 균형 잡힌 인상을 만들어보세요."],
     searchWord: "미니멀",
     colors: ["gray", "beige", "navy", "white", "black", "lavender", "camel"],
     items: ["shirt", "slacks", "skirt", "jacket", "knit", "bag", "coat"],
@@ -86,6 +96,7 @@ export const THEMES: Record<ThemeId, Theme> = {
   unique: {
     id: "unique", en: "Unexpected Mix", ko: "의외의 믹스", feel: "새롭고 개성 있는",
     tip: "평소 잘 고르지 않던 색을 작은 아이템으로 시도해보세요.",
+    closings: ["익숙한 옷에 더해 새로운 조합을 즐겨보세요.", "작은 변화로 기분 전환이 되는 룩을 만들어보세요."],
     searchWord: "유니크",
     colors: ["mint", "skyblue", "mustard", "terracotta", "lavender", "forest"],
     items: ["socks", "cap", "hairacc", "tshirt", "sweatshirt", "bag", "scarf", "sneakers"],

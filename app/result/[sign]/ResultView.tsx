@@ -76,15 +76,13 @@ export default function ResultView({ signId }: { signId: string }) {
       {/* 오늘의 별자리 이야기: 추천 이유 */}
       <section className="block story">
         <p className="pill-label">Today&apos;s Story</p>
-        <div className="story-tags">
-          <span className="story-moon">
-            ☾ 오늘의 달 · {basis.moonSign.name}
-          </span>
-          <span className="story-theme">{theme.en}</span>
-        </div>
+        <p className="story-theme">{theme.en}</p>
         <p className="body-text">{story}</p>
+        <p className="story-moon">
+          ☾ Moon in {basis.moonSign.en} · 달이 {basis.moonSign.name}에 머무는 날
+        </p>
         <p className="note">
-          달의 위치는 한국 시간 정오 기준으로 계산했어요. 점성술의 상징을 패션으로 해석한 추천입니다.
+          달의 위치는 한국 시간 정오 기준으로 계산했어요. 별자리의 상징에서 영감을 얻은 패션 추천입니다.
         </p>
       </section>
 

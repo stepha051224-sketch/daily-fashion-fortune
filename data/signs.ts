@@ -13,6 +13,9 @@ export type Sign = {
   period: string;
   element: Element; // 점성술의 4원소
   keywords: string; // 상징 키워드
+  en: string; // 영문 이름
+  // 달이 이 별자리에 머무는 날의 분위기 (점성술 상징을 옮긴 표현, 추천 이유 첫 문장에 쓰임)
+  moonDayMood: string;
   // 이 별자리가 잘 어울리는 스타일 테마 3가지 (앞쪽일수록 기본 성향에 가까움)
   // trait: 그 테마와 연결되는 별자리의 상징 (추천 이유 문장에 쓰임)
   styles: { theme: ThemeId; trait: string }[];
@@ -22,6 +25,7 @@ export const SIGNS: Sign[] = [
   {
     id: "aries", name: "양자리", symbol: "♈︎", period: "3.21 – 4.19",
     element: "fire", keywords: "활동적 · 대담함 · 에너지",
+    en: "Aries", moonDayMood: "활기차고 적극적인",
     styles: [
       { theme: "active", trait: "활동적인 에너지" },
       { theme: "bold", trait: "대담함" },
@@ -31,6 +35,7 @@ export const SIGNS: Sign[] = [
   {
     id: "taurus", name: "황소자리", symbol: "♉︎", period: "4.20 – 5.20",
     element: "earth", keywords: "안정감 · 편안함 · 소재의 질감",
+    en: "Taurus", moonDayMood: "느긋하고 편안한",
     styles: [
       { theme: "soft", trait: "편안함을 아끼는 감각" },
       { theme: "classic", trait: "안정감" },
@@ -40,6 +45,7 @@ export const SIGNS: Sign[] = [
   {
     id: "gemini", name: "쌍둥이자리", symbol: "♊︎", period: "5.21 – 6.21",
     element: "air", keywords: "변화 · 다양성 · 레이어링",
+    en: "Gemini", moonDayMood: "가볍고 경쾌한",
     styles: [
       { theme: "layered", trait: "다양함을 즐기는 감각" },
       { theme: "unique", trait: "변화를 즐기는 기질" },
@@ -49,6 +55,7 @@ export const SIGNS: Sign[] = [
   {
     id: "cancer", name: "게자리", symbol: "♋︎", period: "6.22 – 7.22",
     element: "water", keywords: "감성 · 부드러움 · 로맨틱",
+    en: "Cancer", moonDayMood: "다정하고 포근한",
     styles: [
       { theme: "romantic", trait: "로맨틱한 감성" },
       { theme: "soft", trait: "부드러운 섬세함" },
@@ -58,6 +65,7 @@ export const SIGNS: Sign[] = [
   {
     id: "leo", name: "사자자리", symbol: "♌︎", period: "7.23 – 8.22",
     element: "fire", keywords: "자신감 · 존재감 · 포인트",
+    en: "Leo", moonDayMood: "밝고 자신감 있는",
     styles: [
       { theme: "bold", trait: "존재감" },
       { theme: "chic", trait: "자신감" },
@@ -67,6 +75,7 @@ export const SIGNS: Sign[] = [
   {
     id: "virgo", name: "처녀자리", symbol: "♍︎", period: "8.23 – 9.23",
     element: "earth", keywords: "정돈 · 섬세함 · 단정함",
+    en: "Virgo", moonDayMood: "차분하고 섬세한",
     styles: [
       { theme: "classic", trait: "단정함" },
       { theme: "chic", trait: "정돈된 감각" },
@@ -76,6 +85,7 @@ export const SIGNS: Sign[] = [
   {
     id: "libra", name: "천칭자리", symbol: "♎︎", period: "9.24 – 10.22",
     element: "air", keywords: "균형 · 조화 · 세련됨",
+    en: "Libra", moonDayMood: "부드럽고 조화로운",
     styles: [
       { theme: "chic", trait: "균형 감각" },
       { theme: "romantic", trait: "조화로움" },
@@ -85,6 +95,7 @@ export const SIGNS: Sign[] = [
   {
     id: "scorpio", name: "전갈자리", symbol: "♏︎", period: "10.23 – 11.22",
     element: "water", keywords: "깊이 · 신비로움 · 강렬함",
+    en: "Scorpio", moonDayMood: "깊고 집중된",
     styles: [
       { theme: "deep", trait: "깊이" },
       { theme: "bold", trait: "강렬함" },
@@ -94,6 +105,7 @@ export const SIGNS: Sign[] = [
   {
     id: "sagittarius", name: "사수자리", symbol: "♐︎", period: "11.23 – 12.24",
     element: "fire", keywords: "자유 · 활동성 · 캐주얼",
+    en: "Sagittarius", moonDayMood: "자유롭고 여유로운",
     styles: [
       { theme: "active", trait: "자유로운 에너지" },
       { theme: "soft", trait: "여유로움" },
@@ -103,6 +115,7 @@ export const SIGNS: Sign[] = [
   {
     id: "capricorn", name: "염소자리", symbol: "♑︎", period: "12.25 – 1.19",
     element: "earth", keywords: "실용성 · 클래식 · 구조적인 실루엣",
+    en: "Capricorn", moonDayMood: "단단하고 차분한",
     styles: [
       { theme: "classic", trait: "클래식한 취향" },
       { theme: "deep", trait: "단단함" },
@@ -112,6 +125,7 @@ export const SIGNS: Sign[] = [
   {
     id: "aquarius", name: "물병자리", symbol: "♒︎", period: "1.20 – 2.18",
     element: "air", keywords: "독창성 · 개성 · 실험적인 스타일",
+    en: "Aquarius", moonDayMood: "새롭고 산뜻한",
     styles: [
       { theme: "unique", trait: "독창성" },
       { theme: "layered", trait: "실험적인 감각" },
@@ -121,6 +135,7 @@ export const SIGNS: Sign[] = [
   {
     id: "pisces", name: "물고기자리", symbol: "♓︎", period: "2.19 – 3.20",
     element: "water", keywords: "몽환적 · 부드러움 · 유연한 실루엣",
+    en: "Pisces", moonDayMood: "몽환적이고 부드러운",
     styles: [
       { theme: "dreamy", trait: "몽환적인 분위기" },
       { theme: "romantic", trait: "부드러움" },

@@ -16,7 +16,7 @@
 
 import { findColor, type Color } from "../data/colors";
 import { ITEMS, type Item } from "../data/items";
-import { ELEMENT_NAMES, findSign, type Element, type Sign } from "../data/signs";
+import { findSign, type Element, type Sign } from "../data/signs";
 import { MOON_MOODS, THEMES, type Theme, type ThemeId } from "../data/themes";
 import { dayNumber, formatDate, getSeason, kstNoon, previousKey, toKstDateKey, type DateKey } from "./date";
 import { josa } from "./korean";
@@ -137,41 +137,50 @@ function computeCore(sign: Sign, key: DateKey, depth: number): Core {
 }
 
 // 6. 추천 이유 — 위에서 실제로 쓴 근거만 사용합니다.
+//  - 본문은 패션 추천에 집중하고, 실제 천체 정보(달의 별자리)는 화면의 작은 라벨로 따로 보여줍니다.
+//  - 첫 문장의 "오늘의 분위기"는 달이 머무는 별자리의 상징을 옮긴 해석입니다.
+//  - 원소 궁합 같은 계산 과정은 문장에 직접 쓰지 않습니다(실제보다 단정적으로 들리지 않도록).
 function buildStory(core: Core): string {
   const { sign, theme, color, item, basis, dateKey } = core;
-  const moonEl = ELEMENT_NAMES[basis.moonElement];
-  const signEl = ELEMENT_NAMES[sign.element];
-  const mood = MOON_MOODS[basis.moonElement].mood;
-  const variant = hashString(`${dateKey}|${sign.id}|story`) % 2;
+  const pick = (n: number, salt: string) => hashString(`${dateKey}|${sign.id}|${salt}`) % n;
+  const dayMood = basis.moonSign.moonDayMood;
+  const look = `${color.name} ${item.name}`;
 
-  // ① 실제 천체 위치 (사실)
-  const sky =
-    variant === 0
-      ? `오늘 달은 ${moonEl}의 별자리인 ${basis.moonSign.name}에 머물고 있어요.`
-      : `오늘 달이 ${moonEl}의 별자리, ${basis.moonSign.name}에 들어와 있어요.`;
+  // ① 오늘의 분위기 (달이 머무는 별자리의 상징)
+  const day = [
+    `오늘은 ${dayMood} 분위기가 돋보이는 날이에요.`,
+    `오늘은 ${dayMood} 흐름이 느껴지는 하루예요.`,
+  ][pick(2, "day")];
 
-  // ② 점성술적 해석 → 오늘의 테마
-  let reading: string;
-  if (basis.themeSource === "both") {
-    reading = `이 흐름의 ${josa.이(mood)} ${sign.name}의 ${josa.과(basis.trait)} 맞닿아, 오늘은 ${theme.ko} 스타일을 골랐어요.`;
-  } else if (basis.themeSource === "moon") {
-    reading = `평소 ${sign.name}의 ${basis.trait}에서 한 걸음 옮겨, 달이 주는 ${josa.을(mood)} 담은 ${theme.ko} 스타일을 제안해요.`;
-  } else if (basis.relation === "same") {
-    reading = `${josa.과(sign.name)} 같은 ${moonEl}의 기운이라, ${josa.을(basis.trait)} 그대로 살린 ${theme.ko} 스타일로 정했어요.`;
-  } else if (basis.relation === "harmony") {
-    reading = `${moonEl}의 기운은 ${signEl}의 별자리인 ${josa.과(sign.name)} 잘 어울려서, ${josa.을(basis.trait)} 살린 ${theme.ko} 스타일로 정했어요.`;
+  // ② 내 별자리 성향과 추천 (테마가 어디에서 왔는지에 따라)
+  let pickLine: string;
+  if (basis.themeSource === "moon") {
+    pickLine = [
+      `평소의 ${sign.name} 스타일과는 조금 다르게, ${josa.을(look)} 추천해요.`,
+      `${sign.name}에게 익숙한 스타일에서 살짝 벗어나 ${josa.을(look)} 골라봤어요.`,
+    ][pick(2, "line")];
+  } else if (basis.themeSource === "both") {
+    pickLine = [
+      `이런 분위기는 ${sign.name} 특유의 ${josa.과(basis.trait)}도 잘 어울려서, ${josa.을(look)} 추천해요.`,
+      `여기에 ${sign.name} 특유의 ${josa.을(basis.trait)} 더해 ${josa.을(look)} 골라봤어요.`,
+    ][pick(2, "line")];
+  } else if (basis.relation === "contrast") {
+    // 내 별자리와 달의 원소가 다른 날: 분위기는 다르지만 본래 성향을 지킨 추천
+    pickLine = [
+      `이런 날에도 ${sign.name} 특유의 ${josa.은(basis.trait)} 살려 ${josa.을(look)} 추천해요.`,
+      `분위기는 조금 다르지만, ${sign.name}의 ${josa.을(basis.trait)} 담아 ${josa.을(look)} 골라봤어요.`,
+    ][pick(2, "line")];
   } else {
-    reading = `${josa.과(sign.name)}는 다른 기운이 흐르는 날이라, ${josa.을(basis.trait)} 중심에 두고 ${theme.ko} 스타일로 균형을 잡았어요.`;
+    pickLine = [
+      `${sign.name} 특유의 ${josa.을(basis.trait)} 살려 ${josa.을(look)} 추천해요.`,
+      `${sign.name}의 ${josa.을(basis.trait)} 담아 ${josa.을(look)} 골라봤어요.`,
+    ][pick(2, "line")];
   }
 
-  // ③ 컬러·아이템 연결 (테마와 색의 분위기 표현이 같으면 한 번만 씁니다)
-  const colorWords = color.mood === theme.feel ? color.name : `${color.mood} ${color.name}`;
-  const outfit =
-    variant === 0
-      ? `그래서 ${colorWords} ${josa.으로(item.name)} ${theme.feel} 분위기를 만들어보세요.`
-      : `${theme.feel} 분위기에 맞춰 ${colorWords} ${josa.을(item.name)} 골라보세요.`;
+  // ③ 스타일링 방향 (테마)
+  const closing = theme.closings[pick(theme.closings.length, "closing")];
 
-  return `${sky} ${reading} ${outfit}`;
+  return `${day} ${pickLine} ${closing}`;
 }
 
 export function getDailyFashionForKey(signId: string, key: DateKey): DailyFashion | null {
