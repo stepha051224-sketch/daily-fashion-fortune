@@ -121,12 +121,12 @@ export default function ResultView({ signId }: { signId: string }) {
       </section>
 
       <div className="actions">
-        <button className="btn btn-primary" type="button" onClick={() => setWearing(true)} disabled={wearing}>
-          오늘 입어볼게요 <Heart size={16} color="#ffffff" />
-        </button>
         <a className="btn btn-secondary" href={searchUrl} target="_blank" rel="noopener noreferrer">
           코디 참고하기 <span aria-hidden="true">↗</span>
         </a>
+        <button className="btn btn-primary" type="button" onClick={() => setWearing(true)} disabled={wearing}>
+          오늘 입어볼게요 <Heart size={16} color="#ffffff" />
+        </button>
       </div>
 
       {wearing && (
