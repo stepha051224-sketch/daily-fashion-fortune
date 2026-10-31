@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Noto_Sans_Symbols, Pinyon_Script, Playfair_Display } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 // 영문 제목·필기체 글꼴은 앱 안에 함께 담아 둡니다 (Next.js 기본 기능).
@@ -31,6 +32,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <main className="page">{children}</main>
+        {/* 방문자 통계 (Vercel Web Analytics) */}
+        <Analytics />
       </body>
     </html>
   );
