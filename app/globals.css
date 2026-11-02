@@ -428,11 +428,6 @@ ul {
   letter-spacing: 0.02em;
 }
 
-.ko-sub {
-  font-size: 14px;
-  color: var(--muted);
-}
-
 .swatch-wrap {
   position: relative;
   flex-shrink: 0;

@@ -143,7 +143,6 @@ export default function ResultView({ signId }: { signId: string }) {
         <div className="color-row">
           <div>
             <p className="en-title">{color.en}</p>
-            <p className="ko-sub">{color.name}</p>
           </div>
           <span className="swatch-wrap">
             <span className="swatch swatch-lg" style={{ background: color.hex }} />
