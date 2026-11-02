@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getDailyFashion, type DailyFashion } from "@/lib/fortune";
+import { makeResultImage } from "@/lib/shareImage";
 import { Heart, Sparkle, Star } from "../../Stickers";
 import WeatherBlock from "./WeatherBlock";
 
@@ -13,7 +14,8 @@ const REVEAL_MS = 1000;
 export default function ResultView({ signId }: { signId: string }) {
   const [result, setResult] = useState<DailyFashion | null>(null);
   const [revealed, setRevealed] = useState(false);
-  const [wearing, setWearing] = useState(false);
+  const [notice, setNotice] = useState(""); // 저장·공유 후 짧은 안내
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     setResult(getDailyFashion(signId, new Date()));
@@ -41,6 +43,56 @@ export default function ResultView({ signId }: { signId: string }) {
   const signEn = sign.id.charAt(0).toUpperCase() + sign.id.slice(1);
   const searchUrl =
     "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(`${color.name} ${item.name} ${theme.searchWord} 코디`);
+
+  const shareUrl = `${window.location.origin}/result/${sign.id}`;
+  const shareText = `오늘 ${sign.name}의 컬러는 ${color.name}, 아이템은 ${item.name}이에요.`;
+
+  function showNotice(text: string) {
+    setNotice(text);
+    setTimeout(() => setNotice(""), 2500);
+  }
+
+  // 이미지 저장: 휴대폰은 공유 창(→ "이미지 저장"), 그 외에는 바로 다운로드
+  async function saveImage() {
+    if (!result) return;
+    setSaving(true);
+    try {
+      const blob = await makeResultImage(result);
+      const fileName = `today-style-${result.dateKey}-${sign.id}.png`;
+      const file = new File([blob], fileName, { type: "image/png" });
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile && navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file] });
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showNotice("이미지를 저장했어요.");
+      }
+    } catch (e) {
+      // 사용자가 공유 창을 닫은 경우는 안내하지 않습니다.
+      if (!(e instanceof DOMException && e.name === "AbortError")) showNotice("이미지를 만들지 못했어요. 다시 시도해 주세요.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  // 공유하기: 휴대폰 공유 창, 없으면 링크 복사
+  async function share() {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "오늘 입는 별자리", text: shareText, url: shareUrl });
+      } else {
+        await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+        showNotice("링크를 복사했어요.");
+      }
+    } catch (e) {
+      if (!(e instanceof DOMException && e.name === "AbortError")) showNotice("공유하지 못했어요. 다시 시도해 주세요.");
+    }
+  }
 
   // ③ Result
   return (
@@ -133,16 +185,19 @@ export default function ResultView({ signId }: { signId: string }) {
         <a className="btn btn-secondary" href={searchUrl} target="_blank" rel="noopener noreferrer">
           코디 참고하기 <span aria-hidden="true">↗</span>
         </a>
-        <button className="btn btn-primary" type="button" onClick={() => setWearing(true)} disabled={wearing}>
-          오늘 입어볼게요 <Heart size={16} color="#ffffff" />
-        </button>
+        <div className="actions-row">
+          <button className="btn btn-primary" type="button" onClick={saveImage} disabled={saving}>
+            {saving ? "만드는 중…" : "이미지 저장"}
+          </button>
+          <button className="btn btn-secondary" type="button" onClick={share}>
+            공유하기
+          </button>
+        </div>
       </div>
 
-      {wearing && (
-        <p className="bubble" role="status">
-          좋은 하루 보내세요.
-          <br />
-          내일은 또 다른 색으로 찾아오겠습니다 ✧
+      {notice && (
+        <p className="notice" role="status">
+          {notice}
         </p>
       )}
 

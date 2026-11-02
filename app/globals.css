@@ -602,31 +602,22 @@ ul {
   color: var(--text);
 }
 
-/* 말풍선 */
-.bubble {
-  position: relative;
-  align-self: center;
-  margin-top: 20px;
-  padding: 12px 22px;
-  background: #fff;
-  border: 1.5px solid var(--text);
-  border-radius: 22px;
-  font-size: 14px;
-  text-align: center;
-  animation: fade 0.5s ease-out;
+/* 이미지 저장 · 공유하기 (2칸) */
+.actions-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
 }
 
-.bubble::before {
-  content: "";
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  width: 14px;
-  height: 14px;
-  background: #fff;
-  border-left: 1.5px solid var(--text);
-  border-top: 1.5px solid var(--text);
-  transform: translateX(-50%) rotate(45deg);
+/* 저장·공유 후 짧은 안내 */
+.notice {
+  align-self: center;
+  margin-top: 14px;
+  padding: 8px 18px;
+  background: var(--pink-soft);
+  border-radius: 999px;
+  font-size: 13px;
+  animation: fade 0.3s ease-out;
 }
 
 .back-link {
