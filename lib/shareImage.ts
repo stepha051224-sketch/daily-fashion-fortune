@@ -139,27 +139,27 @@ export async function makeResultImage(r: DailyFashion): Promise<Blob> {
   sparkle(ctx, 420, 712, 20, "#e9c76a");
   ctx.textAlign = "left";
   ctx.fillStyle = C.muted;
-  ctx.font = `400 24px ${en}`;
-  ctx.fillText("TODAY'S COLOR", 500, 520);
+  ctx.font = `400 22px ${en}`;
+  ctx.fillText("TODAY'S COLOR", 500, 526);
   ctx.fillStyle = C.text;
-  ctx.font = `500 ${r.color.en.length > 9 ? 54 : 68}px ${en}`;
-  ctx.fillText(r.color.en.toUpperCase(), 500, 600);
+  ctx.font = `500 ${r.color.en.length > 9 ? 46 : 56}px ${en}`;
+  ctx.fillText(r.color.en.toUpperCase(), 500, 592);
   ctx.fillStyle = C.muted;
-  ctx.font = `400 30px ${ko}`;
-  ctx.fillText(r.color.name, 500, 648);
+  ctx.font = `400 26px ${ko}`;
+  ctx.fillText(r.color.name, 500, 634);
 
   // 오늘의 아이템
   ctx.fillStyle = C.muted;
-  ctx.font = `400 24px ${en}`;
-  ctx.fillText("TODAY'S ITEM", 500, 728);
+  ctx.font = `400 22px ${en}`;
+  ctx.fillText("TODAY'S ITEM", 500, 722);
   ctx.fillStyle = C.text;
-  ctx.font = `700 52px ${ko}`;
-  ctx.fillText(r.item.name, 500, 792);
+  ctx.font = `700 44px ${ko}`;
+  ctx.fillText(r.item.name, 500, 780);
   const itemW = ctx.measureText(r.item.name).width;
   ctx.fillStyle = C.pinkDeep;
-  ctx.font = `400 46px ${script}`;
-  if (500 + itemW + 24 + ctx.measureText(r.item.en).width < W - 96) {
-    ctx.fillText(r.item.en, 500 + itemW + 24, 790);
+  ctx.font = `400 38px ${script}`;
+  if (500 + itemW + 20 + ctx.measureText(r.item.en).width < W - 96) {
+    ctx.fillText(r.item.en, 500 + itemW + 20, 778);
   }
 
   // 구분선
