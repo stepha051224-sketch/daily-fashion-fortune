@@ -13,7 +13,6 @@ const C = {
   pinkSoft: "#fff0f5",
   pinkDeep: "#d9849f",
 };
-export const SITE_URL = "daily-fashion-fortune.vercel.app";
 
 // 페이지에서 쓰는 글꼴 이름을 그대로 가져옵니다.
 function fontVar(name: string, fallback: string) {
@@ -194,12 +193,6 @@ export async function makeResultImage(r: DailyFashion): Promise<Blob> {
     ctx.textAlign = "left";
     ctx.fillText(c.name, cx + 38, y);
   });
-
-  // 바닥글
-  ctx.textAlign = "center";
-  ctx.fillStyle = C.muted;
-  ctx.font = `400 22px ${en}`;
-  ctx.fillText(SITE_URL, W / 2, H - 70);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("이미지를 만들 수 없습니다."))), "image/png"),
