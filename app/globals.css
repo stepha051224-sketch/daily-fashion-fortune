@@ -421,7 +421,7 @@ ul {
 
 .en-title {
   font-family: var(--font-en);
-  font-size: 38px;
+  font-size: 28px; /* 오늘의 아이템 이름과 눈으로 같은 크기 */
   font-weight: 500;
   line-height: 1.1;
   text-transform: uppercase;
@@ -461,8 +461,8 @@ ul {
 }
 
 .item-name {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: 25px; /* 한글 굵은 글씨가 커 보여서, 컬러 이름(28px)과 눈으로 같은 크기가 되도록 맞춤 */
+  font-weight: 600;
   letter-spacing: -0.02em;
   line-height: 1.2;
 }
@@ -473,7 +473,7 @@ ul {
   align-items: center;
   gap: 4px;
   font-family: var(--font-script);
-  font-size: 26px;
+  font-size: 24px;
   color: var(--pink-deep);
 }
 
